@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tärningsspel</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Tärningsspel med Socket.IO</h1>
+        
+        <!-- spelarens namn och tärning -->
+        <div class="game-box">
+            <h2>Spela</h2>
+            <input type="text" id="playerName" placeholder="Ditt namn">
+            <button id="rollBtn">Kasta tärning</button>
+            <div id="myResult"></div>
+        </div>
+
+        <!-- alla spelares resultat -->
+        <div class="results-box">
+            <h2>Alla kast</h2>
+            <div id="allResults"></div>
+        </div>
+
+        <!-- chatt/kommentarer -->
+        <div class="chat-box">
+            <h2>Kommentarer</h2>
+            <div id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Skriv en kommentar">
+                <button id="sendBtn">Skicka</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
