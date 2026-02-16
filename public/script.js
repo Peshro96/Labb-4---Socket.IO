@@ -1,13 +1,21 @@
-// kommer lägga till socket.io senare
-console.log('Applikation startad');
+// koppla upp till socket.io server
+const socket = io();
 
-// hämta element från html
+// håll koll på total summa
+let totalScore = 0;
+
+// när vi kopplar upp
+socket.on('connect', () => {
+    console.log('Ansluten till servern!');
+});
+
+// hämta element
 const rollBtn = document.getElementById('rollBtn');
 const sendBtn = document.getElementById('sendBtn');
 const playerNameInput = document.getElementById('playerName');
 const messageInput = document.getElementById('messageInput');
 
-// när man klickar på kasta tärning
+// kasta tärning knappen
 rollBtn.addEventListener('click', function() {
     const playerName = playerNameInput.value;
     
@@ -16,21 +24,64 @@ rollBtn.addEventListener('click', function() {
         return;
     }
     
-    // här ska tärningskast och socket logik komma
-    console.log('Kastar tärning för:', playerName);
+    // slumpa tärning 1-6
+    const roll = Math.floor(Math.random() * 6 + 1);
+    totalScore += roll;
+    
+    // visa mitt resultat
+    document.getElementById('myResult').innerHTML = 
+        'Du kastade: ' + roll + ' | Total: ' + totalScore;
+    
+    // skicka till server
+    socket.emit('diceRoll', {
+        playerName: playerName,
+        roll: roll,
+        total: totalScore
+    });
 });
 
-// när man skickar meddelande
+// ta emot nya kast från andra
+socket.on('newRoll', (data) => {
+    const resultDiv = document.getElementById('allResults');
+    const newRoll = document.createElement('div');
+    newRoll.className = 'result-item';
+    newRoll.innerHTML = '<strong>' + data.playerName + '</strong>: Kastade ' + data.roll + ' (Total: ' + data.total + ')';
+    resultDiv.appendChild(newRoll);
+    
+    // scrolla ner automatiskt
+    resultDiv.scrollTop = resultDiv.scrollHeight;
+});
+
+// skicka kommentar
 sendBtn.addEventListener('click', function() {
+    const playerName = playerNameInput.value;
     const message = messageInput.value;
     
-    if (!message) {
+    if (!playerName || !message) {
+        alert('Fyll i namn och meddelande!');
         return;
     }
     
-    // här kommer socket logik för meddelanden
-    console.log('Skickar meddelande:', message);
+    // skicka till server
+    socket.emit('sendMessage', {
+        playerName: playerName,
+        message: message
+    });
+    
+    // töm input
     messageInput.value = '';
+});
+
+// ta emot nya kommentarer
+socket.on('newMessage', (data) => {
+    const chatDiv = document.getElementById('chatMessages');
+    const newMsg = document.createElement('div');
+    newMsg.className = 'chat-item';
+    newMsg.innerHTML = '<strong>' + data.playerName + ':</strong> ' + data.message;
+    chatDiv.appendChild(newMsg);
+    
+    // scrolla ner
+    chatDiv.scrollTop = chatDiv.scrollHeight;
 });
 
 // man kan också trycka enter för att skicka meddelande
