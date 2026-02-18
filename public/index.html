@@ -8,12 +8,14 @@
 <body>
     <div class="container">
         <h1>Tärningsspel med Socket.IO</h1>
+        <div id="userCounter">Uppkopplade: 0</div>
         
         <!-- spelarens namn och tärning -->
         <div class="game-box">
             <h2>Spela</h2>
             <input type="text" id="playerName" placeholder="Ditt namn">
             <button id="rollBtn">Kasta tärning</button>
+            <button id="resetBtn">Nollställ poäng</button>
             <div id="myResult"></div>
         </div>
 
