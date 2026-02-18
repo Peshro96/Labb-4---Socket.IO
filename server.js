@@ -3,87 +3,76 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const path = require('path');
-const mongoose = require('mongoose');
 require('dotenv').config();
-
-// importera modellen
+const mongoose = require('mongoose');
 const DiceRoll = require('./models/DiceRoll');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// koppla upp till MongoDB
+// koppla till mongodb
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Ansluten till MongoDB'))
-    .catch(err => console.error('Fel vid anslutning till MongoDB:', err));
+    .then(() => console.log('Ansluten till MongoDB!'))
+    .catch(err => console.log('MongoDB anslutningsfel:', err));
 
-// middleware för json
+// servera statiska filer
+app.use(express.static('public'));
 app.use(express.json());
 
-// servera statiska filer från public mappen
-app.use(express.static('public'));
-
-// startsida
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API endpoint för att hämta alla sparade tärningskast
-app.get('/api/dice-rolls', async (req, res) => {
-    try {
-        // hämta alla kast, sorterade efter senaste först
-        const rolls = await DiceRoll.find().sort({ timestamp: -1 });
-        res.json(rolls);
-    } catch (error) {
-        console.error('Fel vid hämtning av tärningskast:', error);
-        res.status(500).json({ error: 'Kunde inte hämta tärningskast' });
-    }
-});
+// räkna antal uppkopplade användare
+let userCount = 0;
 
 // socket.io - hantera anslutningar
 io.on('connection', (socket) => {
+    userCount++;
     console.log('En användare anslöt:', socket.id);
-    
-    // skicka antal uppkopplade till alla
-    io.emit('userCount', io.engine.clientsCount);
+    io.emit('userCount', userCount);
 
-    // när någon discar
     socket.on('disconnect', () => {
+        userCount--;
         console.log('Användare disconnectade:', socket.id);
-        // uppdatera antal användare
-        io.emit('userCount', io.engine.clientsCount);
+        io.emit('userCount', userCount);
     });
 
-    // ta emot tärningskast
+    // ta emot tärningskast och SPARA I DATABASEN
     socket.on('diceRoll', async (data) => {
         console.log('Tärningskast från', data.playerName, ':', data.roll);
         
-        // spara i databasen
+        // spara i mongodb
         try {
             const newRoll = new DiceRoll({
                 playerName: data.playerName,
                 roll: data.roll,
-                total: data.total
+                totalScore: data.total
             });
             await newRoll.save();
-            console.log('Tärningskast sparat i databasen');
-        } catch (error) {
-            console.error('Fel vid sparande av tärningskast:', error);
+            console.log('Sparat i databasen!');
+        } catch (err) {
+            console.log('Databasfel:', err);
         }
         
-        // skicka till alla anslutna
         io.emit('newRoll', data);
     });
 
-    // ta emot kommentarer
     socket.on('sendMessage', (message) => {
         console.log('Meddelande:', message);
-        // lägg till tidsstämpel
-        message.time = new Date().toLocaleTimeString('sv-SE');
-        // skicka till alla
         io.emit('newMessage', message);
     });
 });
 
+// API endpoint för att hämta alla tärningskast 
+app.get('/api/rolls', async (req, res) => {
+    try {
+        const rolls = await DiceRoll.find().sort({ timestamp: -1 });
+        res.json(rolls);
+    } catch (err) {
+        res.status(500).json({ error: 'Kunde inte hämta tärningskast' });
+    }
+});
+
 http.listen(PORT, () => {
-    console.log('Servern körs på port ' + PORT);
+    console.log(`Server körs på port ${PORT}`);
 });
