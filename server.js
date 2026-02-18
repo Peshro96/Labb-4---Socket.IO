@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
             const newRoll = new DiceRoll({
                 playerName: data.playerName,
                 roll: data.roll,
-                totalScore: data.total
+                total: data.total
             });
             await newRoll.save();
             console.log('Sparat i databasen!');

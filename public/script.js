@@ -95,7 +95,7 @@ socket.on('newMessage', (data) => {
     const chatDiv = document.getElementById('chatMessages');
     const newMsg = document.createElement('div');
     newMsg.className = 'chat-item';
-    newMsg.innerHTML = '<span class="time">' + data.time + '</span> <strong>' + data.playerName + ':</strong> ' + data.message;
+    newMsg.innerHTML = '<strong>' + data.playerName + ':</strong> ' + data.message;
     chatDiv.appendChild(newMsg);
     
     // scrolla ner
