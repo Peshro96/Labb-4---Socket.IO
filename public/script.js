@@ -9,15 +9,26 @@ socket.on('connect', () => {
     console.log('Ansluten till servern!');
 });
 
+// när vi disconnectar
+socket.on('disconnect', () => {
+    console.log('Tappade anslutningen!');
+});
+
+// ta emot antal användare
+socket.on('userCount', (count) => {
+    document.getElementById('userCounter').innerHTML = 'Uppkopplade: ' + count;
+});
+
 // hämta element
 const rollBtn = document.getElementById('rollBtn');
+const resetBtn = document.getElementById('resetBtn');
 const sendBtn = document.getElementById('sendBtn');
 const playerNameInput = document.getElementById('playerName');
 const messageInput = document.getElementById('messageInput');
 
 // kasta tärning knappen
 rollBtn.addEventListener('click', function() {
-    const playerName = playerNameInput.value;
+    const playerName = playerNameInput.value.trim();
     
     if (!playerName) {
         alert('Du måste skriva ditt namn först!');
@@ -40,6 +51,13 @@ rollBtn.addEventListener('click', function() {
     });
 });
 
+// nollställ poäng knappen
+resetBtn.addEventListener('click', function() {
+    totalScore = 0;
+    document.getElementById('myResult').innerHTML = 'Poäng nollställda!';
+    console.log('Poäng nollställda');
+});
+
 // ta emot nya kast från andra
 socket.on('newRoll', (data) => {
     const resultDiv = document.getElementById('allResults');
@@ -54,8 +72,8 @@ socket.on('newRoll', (data) => {
 
 // skicka kommentar
 sendBtn.addEventListener('click', function() {
-    const playerName = playerNameInput.value;
-    const message = messageInput.value;
+    const playerName = playerNameInput.value.trim();
+    const message = messageInput.value.trim();
     
     if (!playerName || !message) {
         alert('Fyll i namn och meddelande!');
@@ -77,7 +95,7 @@ socket.on('newMessage', (data) => {
     const chatDiv = document.getElementById('chatMessages');
     const newMsg = document.createElement('div');
     newMsg.className = 'chat-item';
-    newMsg.innerHTML = '<strong>' + data.playerName + ':</strong> ' + data.message;
+    newMsg.innerHTML = '<span class="time">' + data.time + '</span> <strong>' + data.playerName + ':</strong> ' + data.message;
     chatDiv.appendChild(newMsg);
     
     // scrolla ner
