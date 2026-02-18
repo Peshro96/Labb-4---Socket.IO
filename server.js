@@ -17,10 +17,15 @@ app.get('/', (req, res) => {
 // socket.io - hantera anslutningar
 io.on('connection', (socket) => {
     console.log('En användare anslöt:', socket.id);
+    
+    // skicka antal uppkopplade till alla
+    io.emit('userCount', io.engine.clientsCount);
 
     // när någon discar
     socket.on('disconnect', () => {
         console.log('Användare disconnectade:', socket.id);
+        // uppdatera antal användare
+        io.emit('userCount', io.engine.clientsCount);
     });
 
     // ta emot tärningskast
@@ -33,6 +38,8 @@ io.on('connection', (socket) => {
     // ta emot kommentarer
     socket.on('sendMessage', (message) => {
         console.log('Meddelande:', message);
+        // lägg till tidsstämpel
+        message.time = new Date().toLocaleTimeString('sv-SE');
         // skicka till alla
         io.emit('newMessage', message);
     });
