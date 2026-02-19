@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 
 // koppla till mongodb
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Ansluten till MongoDB!'))
-    .catch(err => console.log('MongoDB anslutningsfel:', err));
+    .then(() => console.log('✅ Ansluten till MongoDB Atlas'))
+    .catch(err => console.error('❌ MongoDB fel:', err.message));
 
 // servera statiska filer
 app.use(express.static('public'));
@@ -39,7 +39,7 @@ io.on('connection', (socket) => {
 
     // ta emot tärningskast och SPARA I DATABASEN
     socket.on('diceRoll', async (data) => {
-        console.log('Tärningskast från', data.playerName, ':', data.roll);
+        console.log(`🎲 ${data.playerName} kastade ${data.roll}`);
         
         // spara i mongodb
         try {
@@ -49,9 +49,8 @@ io.on('connection', (socket) => {
                 total: data.total
             });
             await newRoll.save();
-            console.log('Sparat i databasen!');
         } catch (err) {
-            console.log('Databasfel:', err);
+            console.error('Databasfel:', err.message);
         }
         
         io.emit('newRoll', data);
@@ -59,20 +58,24 @@ io.on('connection', (socket) => {
 
     socket.on('sendMessage', (message) => {
         console.log('Meddelande:', message);
-        io.emit('newMessage', message);
+        io.emit('new`💬 ${message.playerName}: ${message.message}`
     });
 });
 
 // API endpoint för att hämta alla tärningskast 
 app.get('/api/rolls', async (req, res) => {
     try {
-        const rolls = await DiceRoll.find().sort({ timestamp: -1 });
+        // hämta senaste 100 kast
+        const rolls = await DiceRoll.find()
+            .sort({ timestamp: -1 })
+            .limit(100);
         res.json(rolls);
     } catch (err) {
+        console.error('API error:', err.message);
         res.status(500).json({ error: 'Kunde inte hämta tärningskast' });
     }
 });
 
 http.listen(PORT, () => {
     console.log(`Server körs på port ${PORT}`);
-});
+});🚀 Server körs på http://localhost:

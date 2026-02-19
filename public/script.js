@@ -30,8 +30,14 @@ const messageInput = document.getElementById('messageInput');
 rollBtn.addEventListener('click', function() {
     const playerName = playerNameInput.value.trim();
     
+    // validera namn
     if (!playerName) {
-        alert('Du måste skriva ditt namn först!');
+        alert('Skriv ditt namn först!');
+        return;
+    }
+    
+    if (playerName.length > 20) {
+        alert('Namnet är för långt! Max 20 tecken.');
         return;
     }
     
@@ -75,8 +81,14 @@ sendBtn.addEventListener('click', function() {
     const playerName = playerNameInput.value.trim();
     const message = messageInput.value.trim();
     
+    // validera inputs
     if (!playerName || !message) {
-        alert('Fyll i namn och meddelande!');
+        alert('Fyll i både namn och meddelande!');
+        return;
+    }
+    
+    if (message.length > 200) {
+        alert('Meddelandet är för långt! Max 200 tecken.');
         return;
     }
     
