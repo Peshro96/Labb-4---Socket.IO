@@ -57,8 +57,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('sendMessage', (message) => {
-        console.log('Meddelande:', message);
-        io.emit('new`💬 ${message.playerName}: ${message.message}`
+        console.log(`💬 ${message.playerName}: ${message.message}`);
+        io.emit('newMessage', message);
     });
 });
 
@@ -78,4 +78,5 @@ app.get('/api/rolls', async (req, res) => {
 
 http.listen(PORT, () => {
     console.log(`Server körs på port ${PORT}`);
-});🚀 Server körs på http://localhost:
+});
+
